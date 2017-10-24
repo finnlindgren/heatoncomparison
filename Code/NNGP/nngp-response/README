@@ -1,0 +1,9 @@
+Compiling overview:
+
+Following from details and citations given Section 3.1, nngp.cpp code calls openBLAS and Linear Algebra Package (LAPACK; www.netlib.org/lapack) for efficient matrix computations. OpenBLAS is an implementation of Basic Linear Algebra Subprograms (BLAS; www.netlib.org/blas) able to use multiple processors. Additional multiprocessor parallelization used openMP to improve performance of key steps within the samplers. In particular, substantial gains were realized by distributing the calculation of NNGP precision matrix components using the openMP "omp for" directive. In addition to BLAS and LAPACK, nngp.cpp calls R's standalone math library for random number generation (functions defined in Rmath.h) and a fast sort algorithm defined in R.h (see the Makefile for linking hints and R's Writing R Extensions manual for instruction to compile R and the standalone math library).
+
+All code was compiled using gcc version 4.8.4. Please see the Makefile for compiler and linking arguments. Once compiled, one chain of the given model is run by passing the pifle-* as the first argument of the nngp executable.
+
+After compilation run:
+./nngp pfile-real
+./nngp pfile-sim

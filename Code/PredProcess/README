@@ -1,0 +1,10 @@
+5/10/17
+
+Two NNGP models were used to analyze the real and simulated data sets. The models are detailed in Finley et al. (2017; https://arxiv.org/abs/1702.00434). Model results are labeled response (or resp) for the Response model, see Section 2.2, and conjugate (or conj), see Section 2.3.
+
+Parameter estimates and run time results are in nngp-parameter-est-and-timing.txt
+
+Prediction median and 95% CI bounds are in the *.csv files.
+
+
+

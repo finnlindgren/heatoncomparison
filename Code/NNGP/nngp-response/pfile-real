@@ -1,0 +1,33 @@
+##No spaces between comma separated items (or the world will implode)!
+
+n.threads 12
+dist.threads 12
+seed 1
+n.samples 10000
+n.report 1000
+out.file real
+
+nn 15
+
+nn.fast 0
+nn.index.only 0
+
+#.file is file name, number of rows, and number of columns
+coords.file ../data/coords.mod,105569,2
+X.file ../data/x.mod,105569,3
+y.file ../data/y.mod,105569,1
+
+beta.starting -239.18,1.81,-2.35
+
+tauSq.b 0.0001
+tauSq.starting 0.0002
+tauSq.tuning 0.05
+
+sigmaSq.b 5
+sigmaSq.starting 6.12
+sigmaSq.tuning 0.01
+
+phi.a 0.6
+phi.b 30
+phi.starting 8.83
+phi.tuning 0.01

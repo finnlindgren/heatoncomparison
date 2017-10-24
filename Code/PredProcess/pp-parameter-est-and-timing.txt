@@ -1,0 +1,27 @@
+Modified predictive process fit with 625 regularly spaced knots (25x25 grid)
+
+Finley, A.O., S. Banerjee, A.E. Gelfand. (2015) spBayes for large univariate and multivariate point-referenced spatio-temporal data models. Journal of Statistical Software, 63:1-28.
+
+--------
+Real
+           50%    2.5%   97.5%
+beta_0 -188.61 -209.93 -163.53
+beta_1 0.84    0.48    1.22
+beta_2 -2.16   -2.36   -1.95
+phi 6.99 6.43  7.60
+sigma^2 5.04 4.68  5.43
+tau^2  0.0002 0.0002 0.0003
+run time (sec/iter) 3.84
+cpu time (sec/iter) 12.57
+total run time (sec, 10k iter) 38420.66
+
+--------
+Simulated
+	50%  2.5% 97.5% 
+beta_0   44.73 41.93 47.78
+phi     0.82 0.66  1.01
+sigma^2 11.81 9.58 14.50
+tau^2 0.0003 0.0003  0.0004
+run time (sec/iter) 3.83
+cpu time (sec/iter) 12.56
+total run time (sec, 10k iter) 38353.51
