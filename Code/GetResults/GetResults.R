@@ -6,6 +6,7 @@ library(R.matlab)
 library(xtable)
 library(gridExtra)
 library(ggplot2)
+library(ggpubr)
 
 #######################################
 ## Load Simulated and Satellite Data ##
@@ -154,9 +155,9 @@ for(rw in 1:nrow(Lon)){
 ############################
 ## Get Pred Proc. Results ##
 ############################
-sat.pp <- read.csv("../PredProc/pp-real-pred.csv")
+sat.pp <- read.csv("../PredProc/pp2-real-pred.csv")
 sat.pp$sd <- (sat.pp[,3]-sat.pp[,2])/(2*qnorm(0.975))
-sim.pp <- read.csv("../PredProc/pp-sim-pred.csv")
+sim.pp <- read.csv("../PredProc/pp2-sim-pred.csv")
 sim.pp$sd <- (sim.pp[,3]-sim.pp[,2])/(2*qnorm(0.975))
 
 ######################
@@ -169,6 +170,11 @@ load("../LocalApproxGP/SimLAGP.RData")
 sim.lagp <- list(mean=pmean,lower=plower,upper=pupper)
 sim.lagp$sd <- (sim.lagp$upper-sim.lagp$lower)/(2*qnorm(0.975))
 
+##############################
+## Get Circ. Embed. Results ##
+##############################
+ce.sim <- read.table("../CirculantEmbedding/CESimResults.txt",header=TRUE)
+ce.sat <- read.table("../CirculantEmbedding/CESatResults.txt",header=TRUE)
 
 ##############################
 ## Plot Each For Comparison ##
@@ -198,53 +204,107 @@ preds.pp <- Sat.true
 preds.pp[sat.miss] <- sat.pp[,1]
 preds.lagp <- Sat.true
 preds.lagp[sat.miss] <- sat.lagp$mean
+preds.ce <- Sat.true
+preds.ce[sat.miss] <- ce.sat$pred[sat.miss]
 zlimits <- range(c(preds.NNGP,preds.FRK,preds.part,preds.LK,
                    preds.gapfill,preds.taper,preds.SPDE,preds.meta,
-                   preds.mra,preds.pp,preds.lagp,Sat.true),na.rm=TRUE)
+                   preds.mra,preds.pp,preds.lagp,Sat.true,
+                   preds.ce),na.rm=TRUE)
 
 ## Plot em
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.FRK))
 FRK.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(a) FRK")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(a) FRK") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.gapfill))
 gapfill.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(b) Gapfill")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(b) Gapfill") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.LK))
 LK.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(c) Lattice Krig")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(c) Lattice Krig") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.lagp))
 lagp.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(d) LAGP")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(d) LAGP") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.meta))
 meta.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(e) Metakriging")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(e) Metakriging") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.mra))
 mra.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(f) MRA")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(f) MRA") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.NNGP.conj))
 NNGP.conj.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(g) NNGP-Conjugate")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(g) NNGP-Conj") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.ce))
+ce.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) Per. Embed") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.NNGP))
 NNGP.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) NNGP-Response")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) NNGP-Response") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.part))
 Partition.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(i) Partitioning")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(i) Partitioning") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.pp))
 pp.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits) + ggtitle(label="(j) Pred. Proc.")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits) + ggtitle(label="(j) Pred. Proc.") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.SPDE))
 SPDE.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(k) SPDEs")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(k) SPDEs") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.taper))
 taper.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(l) Tapering")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(l) Tapering") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(Sat.true))
 true.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(m) Truth")
-gridExtra::grid.arrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
-                        mra.plot,NNGP.conj.plot,NNGP.plot,Partition.plot,pp.plot,
-                        SPDE.plot,taper.plot,ncol=2)
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(n) Truth") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+# gridExtra::grid.arrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
+#                         mra.plot,NNGP.conj.plot,ce.plot,Partition.plot,pp.plot,
+#                         SPDE.plot,taper.plot,ncol=2)
+# gridExtra::grid.arrange(gapfill.plot,mra.plot,Partition.plot,pp.plot,
+#                         ncol=2)
+ggarrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
+          mra.plot,NNGP.conj.plot,ce.plot,Partition.plot,
+          pp.plot,SPDE.plot,taper.plot,legend="right",
+          common.legend = TRUE)
 
 ## Plot Simulated Predictions
 preds.NNGP <- Sim.true
@@ -270,58 +330,110 @@ preds.pp <- Sim.true
 preds.pp[sim.miss] <- sim.pp[,1]
 preds.lagp <- Sim.true
 preds.lagp[sim.miss] <- sim.lagp$mean
+preds.ce <- Sim.true
+preds.ce[sim.miss] <- ce.sim$pred[sim.miss]
 zlimits <- range(c(preds.NNGP,preds.FRK,preds.part,preds.LK,preds.NNGP.conj,
                    preds.gapfill,preds.taper,preds.SPDE,preds.meta,
-                   preds.mra,preds.pp,preds.lagp,Sim.true))
+                   preds.mra,preds.pp,preds.lagp,Sim.true,preds.ce))
 
 ## Plot em
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.FRK))
 FRK.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(a) FRK")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(a) FRK") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.gapfill))
 gapfill.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(b) Gapfill")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(b) Gapfill") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.LK))
 LK.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(c) Lattice Krig")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(c) Lattice Krig") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.lagp))
 lagp.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(d) LAGP")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(d) LAGP") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.meta))
 meta.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(e) Metakriging")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(e) Metakriging") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.mra))
 mra.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(f) MRA")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(f) MRA") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.NNGP.conj))
 NNGP.conj.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(g) NNGP-Conjugate")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(g) NNGP-Conjugate") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.NNGP))
 NNGP.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) NNGP-Response")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) NNGP-Response") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.ce))
+ce.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(h) Per. Embed") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.part))
 Partition.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(i) Partitioning")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(i) Partitioning") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.pp))
 pp.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits) + ggtitle(label="(j) Pred. Proc.")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits) + ggtitle(label="(j) Pred. Proc.") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.SPDE))
 SPDE.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(k) SPDEs")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(k) SPDEs") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(preds.taper))
 taper.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(l) Tapering")
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(l) Tapering") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
 preds.df <- data.frame(Lon=c(Lon),Lat=c(Lat),Pred=c(Sim.true))
 true.plot <- ggplot(preds.df) + geom_raster(aes(Lon,Lat,fill=Pred)) +
-  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(m) Truth")
-gridExtra::grid.arrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
-                        mra.plot,NNGP.conj.plot,NNGP.plot,Partition.plot,pp.plot,
-                        SPDE.plot,taper.plot,ncol=2)
+  theme_bw() + scale_fill_distiller(palette="Spectral",name="",limits=zlimits)+ ggtitle(label="(m) Truth") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        plot.title = element_text(size = 10),
+        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+# gridExtra::grid.arrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
+#                         mra.plot,NNGP.conj.plot,ce.plot,Partition.plot,pp.plot,
+#                         SPDE.plot,taper.plot,ncol=2)
+ggarrange(FRK.plot,gapfill.plot,LK.plot,lagp.plot,meta.plot,
+          mra.plot,NNGP.conj.plot,ce.plot,Partition.plot,
+          pp.plot,SPDE.plot,taper.plot,legend="right",
+          common.legend = TRUE)
 
 ##########################################
 ## Numerical Results for Satellite Data ##
 ##########################################
-satres.df <- data.frame(Method=c("NNGP","NNGPc","Taper","GapFill","Partition","FRK","LK","SPDE","Meta","MRA","PP","LAGP"))
+satres.df <- data.frame(Method=c("NNGP","NNGPc","Taper","GapFill","Partition","FRK","LK","SPDE","Meta","MRA",
+                                 "PP","LAGP","CE"))
 
 ## MAE
 satres.df$MAE <- c(mean(abs(nngp.sat$Pred[sat.preds]-Sat.true[sat.miss]),na.rm=TRUE),
@@ -335,7 +447,8 @@ satres.df$MAE <- c(mean(abs(nngp.sat$Pred[sat.preds]-Sat.true[sat.miss]),na.rm=T
                    mean(abs(meta.sat$Y.med[sat.preds]-Sat.true[sat.miss]),na.rm=TRUE),
                    mean(abs(mra.sat$predMat[sat.miss]-Sat.true[sat.miss]),na.rm=TRUE),
                    mean(abs(sat.pp[sat.preds,1]-Sat.true[sat.miss]),na.rm=TRUE),
-                   mean(abs(sat.lagp$mean[sat.preds]-Sat.true[sat.miss]),na.rm=TRUE)
+                   mean(abs(sat.lagp$mean[sat.preds]-Sat.true[sat.miss]),na.rm=TRUE),
+                   mean(abs(ce.sat$pred[sat.miss]-Sat.true[sat.miss]),na.rm=TRUE)
                    )
 
 ## RMSE
@@ -350,7 +463,8 @@ satres.df$RMSE <- c(sqrt(mean((nngp.sat$Pred[sat.preds]-Sat.true[sat.miss])^2,na
                     sqrt(mean((meta.sat$Y.med[sat.preds]-Sat.true[sat.miss])^2,na.rm=TRUE)),
                     sqrt(mean((mra.sat$predMat[sat.miss]-Sat.true[sat.miss])^2,na.rm=TRUE)),
                     sqrt(mean((sat.pp[sat.preds,1]-Sat.true[sat.miss])^2,na.rm=TRUE)),
-                    sqrt(mean((sat.lagp$mean[sat.preds]-Sat.true[sat.miss])^2,na.rm=TRUE))
+                    sqrt(mean((sat.lagp$mean[sat.preds]-Sat.true[sat.miss])^2,na.rm=TRUE)),
+                    sqrt(mean((ce.sat$pred[sat.miss]-Sat.true[sat.miss])^2,na.rm=TRUE))
                     )
 
 ## CRPS
@@ -371,7 +485,8 @@ satres.df$CRPS <- c(mean(crps(list(mean=nngp.sat$Pred[sat.preds],sd=nngp.sat$sd[
                     mean(crps(list(mean=meta.sat$Y.med[sat.preds],sd=meta.sat$SD[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
                     mean(crps(list(mean=mra.sat$predMat[sat.miss],sd=mra.sat$sdMat[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE),
                     mean(crps(list(mean=sat.pp[sat.preds,1],sd=sat.pp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
-                    mean(crps(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE)
+                    mean(crps(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
+                    mean(crps(list(mean=ce.sat$pred[sat.miss],sd=ce.sat$se[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE)
 )
 
 ## Interval Score
@@ -392,7 +507,8 @@ satres.df$intscore <- c(mean(intscore(list(mean=nngp.sat$Pred[sat.preds],sd=nngp
                     mean(intscore(list(mean=meta.sat$Y.med[sat.preds],sd=meta.sat$SD[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
                     mean(intscore(list(mean=mra.sat$predMat[sat.miss],sd=mra.sat$sdMat[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE),
                     mean(intscore(list(mean=sat.pp[sat.preds,1],sd=sat.pp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
-                    mean(intscore(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE)
+                    mean(intscore(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
+                    mean(intscore(list(mean=ce.sat$pred[sat.miss],sd=ce.sat$se[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE)
 )                   
 
 ## Coverage
@@ -412,7 +528,8 @@ satres.df$CVG <- c(mean(cvg(list(mean=nngp.sat$Pred[sat.preds],sd=nngp.sat$sd[sa
                         mean(cvg(list(mean=meta.sat$Y.med[sat.preds],sd=meta.sat$SD[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
                         mean(cvg(list(mean=mra.sat$predMat[sat.miss],sd=mra.sat$sdMat[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE),
                         mean(cvg(list(mean=sat.pp[sat.preds,1],sd=sat.pp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
-                        mean(cvg(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE)
+                        mean(cvg(list(mean=sat.lagp$mean[sat.preds],sd=sat.lagp$sd[sat.preds]),Sat.true[sat.miss]),na.rm=TRUE),
+                        mean(cvg(list(mean=ce.sat$pred[sat.miss],sd=ce.sat$se[sat.miss]),Sat.true[sat.miss]),na.rm=TRUE)
 )                   
 
 ## Rank Methods
@@ -434,7 +551,8 @@ xtable(satres.df,digits=2)
 ##########################################
 ## Numerical Results for Simulated Data ##
 ##########################################
-simres.df <- data.frame(Method=c("NNGP","NNGPc","Taper","GapFill","Partition","FRK","LK","SPDE","Meta","MRA","PP","LAGP"))
+simres.df <- data.frame(Method=c("NNGP","NNGPc","Taper","GapFill","Partition","FRK","LK","SPDE","Meta","MRA",
+                                 "PP","LAGP","CE"))
 
 ## MAE
 simres.df$MAE <- c(mean(abs(nngp.sim$Pred[sim.preds]-Sim.true[sim.miss]),na.rm=TRUE),
@@ -448,7 +566,8 @@ simres.df$MAE <- c(mean(abs(nngp.sim$Pred[sim.preds]-Sim.true[sim.miss]),na.rm=T
                    mean(abs(meta.sim$Y.med[sim.preds]-Sim.true[sim.miss]),na.rm=TRUE),
                    mean(abs(mra.sim$predMat[sim.miss]-Sim.true[sim.miss]),na.rm=TRUE),
                    mean(abs(sim.pp[sim.preds,1]-Sim.true[sim.miss]),na.rm=TRUE),
-                   mean(abs(sim.lagp$mean[sim.preds]-Sim.true[sim.miss]),na.rm=TRUE)
+                   mean(abs(sim.lagp$mean[sim.preds]-Sim.true[sim.miss]),na.rm=TRUE),
+                   mean(abs(ce.sim$pred[sim.miss]-Sim.true[sim.miss]),na.rm=TRUE)
 )
 
 ## RMSE
@@ -463,7 +582,8 @@ simres.df$RMSE <- c(sqrt(mean((nngp.sim$Pred[sim.preds]-Sim.true[sim.miss])^2,na
                     sqrt(mean((meta.sim$Y.med[sim.preds]-Sim.true[sim.miss])^2,na.rm=TRUE)),
                     sqrt(mean((mra.sim$predMat[sim.miss]-Sim.true[sim.miss])^2,na.rm=TRUE)),
                     sqrt(mean((sim.pp[sim.preds,1]-Sim.true[sim.miss])^2,na.rm=TRUE)),
-                    sqrt(mean((sim.lagp$mean[sim.preds]-Sim.true[sim.miss])^2,na.rm=TRUE))
+                    sqrt(mean((sim.lagp$mean[sim.preds]-Sim.true[sim.miss])^2,na.rm=TRUE)),
+                    sqrt(mean((ce.sim$pred[sim.miss]-Sim.true[sim.miss])^2,na.rm=TRUE))
 )
 
 ## CRPS
@@ -478,7 +598,8 @@ simres.df$CRPS <- c(mean(crps(list(mean=nngp.sim$Pred[sim.preds],sd=nngp.sim$sd[
                     mean(crps(list(mean=meta.sim$Y.med[sim.preds],sd=meta.sim$SD[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
                     mean(crps(list(mean=mra.sim$predMat[sim.miss],sd=mra.sim$sdMat[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE),
                     mean(crps(list(mean=sim.pp[sim.preds,1],sd=sim.pp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
-                    mean(crps(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE)
+                    mean(crps(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
+                    mean(crps(list(mean=ce.sim$pred[sim.miss],sd=ce.sim$se[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE)
 )
 
 ## Interval Score
@@ -493,7 +614,8 @@ simres.df$intscore <- c(mean(intscore(list(mean=nngp.sim$Pred[sim.preds],sd=nngp
                         mean(intscore(list(mean=meta.sim$Y.med[sim.preds],sd=meta.sim$SD[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
                         mean(intscore(list(mean=mra.sim$predMat[sim.miss],sd=mra.sim$sdMat[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE),
                         mean(intscore(list(mean=sim.pp[sim.preds,1],sd=sim.pp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
-                        mean(intscore(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE)
+                        mean(intscore(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
+                        mean(intscore(list(mean=ce.sim$pred[sim.miss],sd=ce.sim$se[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE)
 )
 
 ## Coverage
@@ -508,7 +630,8 @@ simres.df$CVG <- c(mean(cvg(list(mean=nngp.sim$Pred[sim.preds],sd=nngp.sim$sd[si
                    mean(cvg(list(mean=meta.sim$Y.med[sim.preds],sd=meta.sim$SD[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
                    mean(cvg(list(mean=mra.sim$predMat[sim.miss],sd=mra.sim$sdMat[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE),
                    mean(cvg(list(mean=sim.pp[sim.preds,1],sd=sim.pp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
-                   mean(cvg(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE)
+                   mean(cvg(list(mean=sim.lagp$mean[sim.preds],sd=sim.lagp$sd[sim.preds]),Sim.true[sim.miss]),na.rm=TRUE),
+                   mean(cvg(list(mean=ce.sim$pred[sim.miss],sd=ce.sim$se[sim.miss]),Sim.true[sim.miss]),na.rm=TRUE)
 )
 
 ## Rank Methods

@@ -1,0 +1,28 @@
+##No spaces between comma separated items (or the world will implode)!
+
+n.threads 10
+seed 1
+n.samples 25000
+n.report 100
+out.file sim
+
+#.file is file name, number of rows, and number of columns
+coords.file ../../coords-sim.mod,105569,2
+X.file ../../x-sim.mod,105569,1
+y.file ../../y-sim.mod,105569,1
+knot.file knots,196,2
+
+beta.starting 0
+
+tauSq.b 0.01
+tauSq.starting 0.05
+tauSq.tuning 0.01
+
+sigmaSq.b 10
+sigmaSq.starting 10
+sigmaSq.tuning 0.01
+
+phi.a 0.6
+phi.b 30
+phi.starting 1.21
+phi.tuning 3

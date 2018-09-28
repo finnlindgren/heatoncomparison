@@ -1,0 +1,4 @@
+Unmarginalized Gaussian Predictive Process (GPP) sampler as defined in Banerjee et al. 2008. See Makefile for linking and compiling hints. OMP and OpenBLAS used for threaded matrix operations. Real and simulated run information held in pfile-real and pfile-sim respectively. Once compiled the model is fit via ./gpp pfile-real or ./gpp pfile-sim.
+
+Banerjee, S., A.E. Gelfand, A.O. Finley, and H. Sang. (2008) Gaussian Predictive Process Models for Large Spatial Datasets. Journal of the Royal Statistical Society Series B, 70:825–848.
+
